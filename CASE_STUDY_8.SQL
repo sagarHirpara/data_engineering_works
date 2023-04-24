@@ -10,10 +10,10 @@ SELECT
 	*
 FROM
 	[ dbo ].[ json_data ]
-	/*
-	 1. Update the fresh_segments.interest_metrics table by modifying the month_year column
-	 to be a date data type with the start of the month
-	 */
+/*
+ 1. Update the fresh_segments.interest_metrics table by modifying the month_year column
+ to be a date data type with the start of the month
+ */
 alter table
 	[ interest_metrics ]
 alter column
@@ -28,11 +28,11 @@ update
 	[ interest_metrics ]
 set
 	month_year = CONVERT(DATE, month_year, 105)
-	/*
-	 
-	 2. What is count of records in the fresh_segments.interest_metrics for each month_year value 
-	 sorted in chronological order (earliest to latest) with the null values appearing first?
-	 */
+/*
+
+ 2. What is count of records in the fresh_segments.interest_metrics for each month_year value 
+ sorted in chronological order (earliest to latest) with the null values appearing first?
+ */
 select
 	month_year,
 	count(*) as total
@@ -45,6 +45,7 @@ order by
 
 -- 3. What do you think we should do with these null values in the fresh_segments.interest_metrics
 -- before delete null
+
 SELECT
 	COUNT(*)
 FROM
@@ -68,6 +69,7 @@ where
 
 -- 4. How many interest_id values exist in the fresh_segments.interest_metrics table
 -- but not in the fresh_segments.interest_map table? What about the other way around?
+
 with cte as(
 	select
 		count(interest_id) as not_in_map
@@ -101,6 +103,7 @@ from
 	cte2;
 
 -- 5. Summarise the id values in the fresh_segments.interest_map by its total record count in this table
+
 select
 	count(*)
 from
@@ -115,6 +118,7 @@ from
 --Check your logic by checking the rows where interest_id = 21246 in your joined output
 -- and include all columns from fresh_segments.interest_metrics and all columns from fresh_segments.interest_map
 --except from the id column.
+
 select
 	i.*,
 	interest_name,
@@ -130,6 +134,7 @@ where
 -- 7. Are there any records in your joined table where the month_year value is before
 --the created_at value from the fresh_segments.interest_map table?
 --Do you think these values are valid and why?
+
 select
 	count(*) n_records
 from
@@ -140,6 +145,7 @@ where
 
 -- Interest Analysis
 -- 1. Which interests have been present in all month_year dates in our dataset?
+
 with cte as(
 	select
 		interest_id,
@@ -162,6 +168,7 @@ from
 	cte;
 
 -- 2. Using this same total_months measure - calculate the cumulative percentage of all records starting at 14 months - which total_months value passes the 90% cumulative percentage value?
+
 with cte as(
 	SELECT
 		interest_id,
@@ -196,6 +203,7 @@ order by
 	total_months desc;
 
 -- 3. If we were to remove all interest_id values which are lower than the total_months value we found in the previous question - how many total data points would we be removing?
+
 with cte as (
 	SELECT
 		interest_id,
@@ -215,6 +223,7 @@ from
 -- 4. Does this decision make sense to remove these data points from a business perspective?
 -- Use an example where there are all 14 months present to a removed interest example for your arguments - think about what it means to have less months present from a segment perspective.
 -- 5. After removing these interests - how many unique interests are there for each month?
+
 WITH cte_total_months AS (
 	SELECT
 		interest_id,
@@ -245,9 +254,11 @@ ORDER BY
 
 --
 --  C . Segment Analysis
+
 -- 1. Using our filtered dataset by removing the interests with less than 6 months worth of data,
 -- which are the top 10 and bottom 10 interests which have the largest composition values in any month_year?
 -- Only use the maximum composition value for each interest but you must keep the corresponding month_year
+
 DROP TABLE IF EXISTS # filtered_data;
 
 WITH cte_total_months AS (
